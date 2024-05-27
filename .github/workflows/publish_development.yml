@@ -1,0 +1,38 @@
+name: Publish Development NuGet package
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "development" ]
+    paths-ignore:
+    - 'README.md'
+    - '/github/**/*.*'
+
+jobs:
+  build:
+    runs-on: self-hosted
+    env:
+      DOTNET_INSTALL_DIR: "~/.dotnet"
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      working-directory: ./src
+      run: dotnet restore
+
+    - name: Test
+      working-directory: ./src
+      run: dotnet test -c Release
+
+    - name: Pack
+      working-directory: ./src/SolidCode.Extensions.Configuration.Yaml
+      run: dotnet pack --configuration Release
+
+    - name: Publish
+      working-directory: ./src/SolidCode.Extensions.Configuration.Yaml
+      run: dotnet nuget push "**/*.nupkg" --api-key ${{ secrets.MYGET_ORG_API_KEY }} --source https://www.myget.org/F/solidcode/api/v2/package

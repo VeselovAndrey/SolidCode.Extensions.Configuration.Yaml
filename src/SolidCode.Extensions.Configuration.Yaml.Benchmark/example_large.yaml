@@ -1,0 +1,324 @@
+application:
+  name: SampleWebApp
+  version: 1.0.0
+  environment: production
+
+server:
+  host: 0.0.0.0
+  port: 8080
+  ssl:
+    enabled: true
+    certificate_path: /etc/ssl/certs/server.crt
+    key_path: /etc/ssl/private/server.key
+  compression:
+    enabled: true
+    level: 6
+
+database:
+  type: postgresql
+  host: db.example.com
+  port: 5432
+  name: sample_db
+  user: db_user
+  password: securepassword
+  pool:
+    max_connections: 20
+    min_connections: 5
+    connection_timeout: 30
+    idle_timeout: 300
+  backup:
+    schedule: '0 4 * * *'
+    destination: /var/backups/database
+
+cache:
+  type: redis
+  host: cache.example.com
+  port: 6379
+  ttl: 600
+  max_memory: 512mb
+  sentinel:
+    enabled: false
+    master_name: mymaster
+    nodes:
+      - host: sentinel1.example.com
+        port: 26379
+      - host: sentinel2.example.com
+        port: 26379
+
+logging:
+  level: INFO
+  format: json
+  output:
+    - type: file
+      path: /var/log/samplewebapp/application.log
+    - type: console
+  rotation:
+    max_size: 100mb
+    max_age: 30
+    max_backups: 10
+  remote:
+    enabled: true
+    endpoint: https://logs.example.com
+    api_key: your_api_key
+
+security:
+  cors:
+    allowed_origins:
+      - https://example.com
+      - https://another-example.com
+    allowed_methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+    allowed_headers:
+      - Content-Type
+      - Authorization
+  csrf:
+    enabled: true
+    secret_key: CsrfSecretKey
+  headers:
+    strict_transport_security: "max-age=63072000; includeSubDomains"
+    content_security_policy: "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+
+authentication:
+  jwt:
+    secret_key: JwtSecretKey
+    expiration: 3600
+  oauth2:
+    providers:
+      google:
+        client_id: google-client-id
+        client_secret: google-client-secret
+        redirect_uri: https://example.com/oauth2/callback
+      github:
+        client_id: github-client-id
+        client_secret: github-client-secret
+        redirect_uri: https://example.com/oauth2/callback
+  ldap:
+    enabled: true
+    url: ldap://ldap.example.com
+    base_dn: ou=users,dc=example,dc=com
+    user_filter: (uid={username})
+    bind_dn: cn=admin,dc=example,dc=com
+    bind_password: ldap_password
+
+email:
+  smtp:
+    host: smtp.example.com
+    port: 587
+    username: email_user
+    password: emailpassword
+    from_address: no-reply@example.com
+  templates:
+    welcome_email: templates/welcome_email.html
+    password_reset: templates/password_reset.html
+    weekly_summary: templates/weekly_summary.html
+
+features:
+  enable_signups: true
+  enable_notifications: true
+  beta_features:
+    - feature_flag_1
+    - feature_flag_2
+  experimental:
+    - new_search_algorithm
+    - ai_recommendations
+
+third_party_services:
+  analytics:
+    provider: GoogleAnalytics
+    tracking_id: NN-XXXXXX-1
+  payment:
+    provider: Stripe
+    api_key: S1_XXXX_XXXXXXXXXXXXXXXXXXXXXXXX
+  sms:
+    provider: Twilio
+    account_sid: T1XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+    auth_token: your_auth_token
+  crm:
+    provider: Salesforce
+    client_id: salesforce-client-id
+    client_secret: salesforce-client-secret
+    redirect_uri: https://example.com/salesforce/callback
+
+jobs:
+  cleanup:
+    schedule: '0 2 * * *'
+    script: /usr/local/bin/cleanup.sh
+  backup:
+    schedule: '0 3 * * *'
+    script: /usr/local/bin/backup.sh
+  email_reminders:
+    schedule: '0 9 * * 1'
+    script: /usr/local/bin/email_reminders.sh
+
+api:
+  rate_limit:
+    requests_per_minute: 100
+    burst_capacity: 200
+  timeout: 30s
+  max_payload_size: 10mb
+  throttling:
+    enabled: true
+    rate: 1000/m
+
+ui:
+  theme: dark
+  languages:
+    - en
+    - es
+    - fr
+    - de
+  date_format: 'YYYY-MM-DD'
+  timezone: UTC
+  notifications:
+    sound: true
+    vibration: true
+
+dependencies:
+  - name: library-one
+    version: ^1.2.0
+  - name: library-two
+    version: ~2.3.4
+  - name: library-three
+    version: 3.0.0
+  - name: library-four
+    version: 4.0.0
+  - name: library-five
+    version: 5.1.2
+
+notifications:
+  email:
+    enabled: true
+    template_path: /path/to/email/templates
+  sms:
+    enabled: true
+    template_path: /path/to/sms/templates
+  push:
+    enabled: true
+    firebase_server_key: your_firebase_server_key
+  webhooks:
+    enabled: true
+    endpoints:
+      - url: https://webhook.example.com/notify
+        secret: webhook_secret_key
+
+monitoring:
+  enabled: true
+  provider: NewRelic
+  license_key: your_new_relic_license_key
+  metrics:
+    enabled: true
+    endpoint: https://metrics.example.com
+    api_key: metrics_api_key
+
+i18n:
+  default_locale: en
+  supported_locales:
+    - en
+    - es
+    - fr
+    - de
+    - it
+  translation_files:
+    - path: /path/to/translations/en.json
+      locale: en
+    - path: /path/to/translations/es.json
+      locale: es
+    - path: /path/to/translations/fr.json
+      locale: fr
+    - path: /path/to/translations/de.json
+      locale: de
+    - path: /path/to/translations/it.json
+      locale: it
+
+custom_settings:
+  max_upload_size: 50mb
+  maintenance_mode: false
+  feature_flags:
+    enable_new_dashboard: true
+    enable_beta_features: false
+  branding:
+    logo_path: /assets/logo.png
+    favicon_path: /assets/favicon.ico
+
+scheduler:
+  timezone: UTC
+  jobs:
+    - name: daily_report
+      schedule: '0 1 * * *'
+      script: /usr/local/bin/daily_report.sh
+    - name: update_exchange_rates
+      schedule: '0 0 * * MON'
+      script: /usr/local/bin/update_exchange_rates.sh
+    - name: clear_cache
+      schedule: '0 0 * * SUN'
+      script: /usr/local/bin/clear_cache.sh
+
+storage:
+  local:
+    path: /data/storage
+    max_size: 100gb
+  s3:
+    enabled: true
+    bucket_name: my-app-bucket
+    region: us-west-2
+    access_key: YOUR_S3_ACCESS_KEY
+    secret_key: YOUR_S3_SECRET_KEY
+
+backup:
+  local:
+    path: /data/backups
+    retention_days: 30
+  cloud:
+    enabled: true
+    provider: AmazonS3
+    bucket_name: my-app-backup
+    region: us-west-2
+    access_key: YOUR_S3_ACCESS_KEY
+    secret_key: YOUR_S3_SECRET_KEY
+
+rate_limits:
+  api:
+    default:
+      limit: 1000
+      window: 1m
+    user:
+      limit: 500
+      window: 1m
+  login:
+    attempts: 5
+    window: 15m
+
+session:
+  timeout: 30m
+  persistent: true
+  store: redis
+  redis:
+    host: session-cache.example.com
+    port: 6379
+
+cdn:
+  enabled: true
+  provider: Cloudflare
+  api_key: your_cloudflare_api_key
+
+payment_processing:
+  gateways:
+    stripe:
+      api_key: S2_XXXX_XXXXXXXXXXXXXXXXXXXXXXXX
+    paypal:
+      client_id: your_paypal_client_id
+      client_secret: your_paypal_client_secret
+
+audit:
+  enabled: true
+  log_file: /var/log/samplewebapp/audit.log
+  retention_days: 365
+
+hooks:
+  pre_deploy:
+    - script: /usr/local/bin/pre_deploy_checks.sh
+  post_deploy:
+    - script: /usr/local/bin/post_deploy_cleanup.sh

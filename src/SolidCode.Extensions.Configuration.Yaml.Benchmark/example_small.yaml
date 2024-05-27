@@ -1,0 +1,87 @@
+# This is comment that will be ignored when loading
+number1: 42 # comment to ignore
+number2: 45
+number3: # mapped to int
+number4: # mapped to int?
+number5: null
+bool1: true
+stringWithNoQuotes: This is "simple" \string\ with 'quotes' inside. # comment with # char to ignore
+stringWithDoubleQuotes: "This is \"complex\" string wrapped with double quotes and with '#' symbol." # comment to be ignore
+stringWithQuotes: 'This is "complex" string wrapped with quotes and with \'#\' symbol.' # comment to ignore
+
+# mapping
+simpleMapping: # mapping node
+  id: 75
+  title: "Some title with \"quotes\""
+
+# mapping scalar to sequence
+simpleSequence: # sequence node
+  - "value#1"
+  - value#"2" # collection value with comment
+  - value#'3' # "quotes" inside 'another' comment
+  - value#4
+
+complexSequence: # sequence with mapping
+  - id: 1
+    title: "Title 1"
+  - id: 2
+    title: "Title 2"
+  - id: 3
+    title: "Title 3"
+    codes:
+      - 95
+      - -362
+
+jsonAsText: |
+  {
+    "id": 345,
+    "title": "The json text"
+  }
+
+multiLineSequence1:
+  - |
+    "This is block scalar: with multiple lines."
+    It can contain any character, including '#' and quotes.
+    It is very useful for multiline strings.
+  - >
+    "This is folded scalar: with multiple lines."
+    It can contain any character, including '#' and quotes.
+      This is new line 1 in folded scalar.
+      This is new line 2 in folded scalar.
+    It is very useful for strings readability.
+
+multiLineSequence2:
+  - id: 1
+    title: |
+      "This is block scalar: with multiple lines."
+      It can contain any character, including '#' and quotes.
+      It is very useful for multiline strings.
+  - id: 2
+    title: >
+      "This is folded scalar: with multiple lines."
+      It can contain any character, including '#' and quotes.
+        This is new line 1 in folded scalar.
+        This is new line 2 in folded scalar.
+      It is very useful for strings readability.
+
+scalarLiterals: |
+  "This is block scalar: with multiple lines."
+  It can contain any character, including '#' and quotes.
+  It is very useful for multiline strings.
+
+scalarFolded: >
+  "This is folded scalar: with multiple lines."
+  It can contain any character, including '#' and quotes.
+  It is very useful for multiline strings.
+
+scalarFoldedWithNewLine: >
+  "This is folded scalar: with multiple lines."
+  It can contain any character, including '#' and quotes.
+    This is new line 1 in folded scalar.
+    This is new line 2 in folded scalar.
+  It is very useful for strings readability.
+
+sequenceWithText:
+  - This is sequence with text.
+  - "It can contain any character, including '#' and quotes."
+  - "It is very useful for an array of strings."
