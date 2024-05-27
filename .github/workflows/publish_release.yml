@@ -1,0 +1,36 @@
+name: Publish NuGet package
+
+on:
+  push:
+    branches: [ "release" ]
+    paths-ignore:
+    - 'README.md'
+
+jobs:
+  build:
+    runs-on: self-hosted
+    env:
+      DOTNET_INSTALL_DIR: "~/.dotnet"
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Restore dependencies
+      working-directory: ./src
+      run: dotnet restore
+
+    - name: Test
+      working-directory: ./src
+      run: dotnet test -c Release
+
+    - name: Pack
+      working-directory: ./src/SolidCode.Extensions.Configuration.Yaml
+      run: dotnet pack --configuration Release
+
+    - name: Publish
+      working-directory: ./src/SolidCode.Extensions.Configuration.Yaml
+      run: dotnet nuget push "**/*.nupkg" --api-key ${{ secrets.NUGET_ORG_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
