@@ -151,10 +151,10 @@ internal ref struct YamlReader(StreamReader yamlReader, Span<char> buffer)
 
 		// No EOL found (but stream there are no more data in the stream)
 		if (_yamlReader.EndOfStream)
-			return new BufferScanResult(scanStartIndex, _bufferLength - 1, 0);
+			return new BufferScanResult(scanStartIndex, _bufferLength - 1, eolCharsCount: 0);
 
 		// No EOL found, but buffer can be updated.
-		return new BufferScanResult(scanStartIndex, _noEolFoundIndex, 0);
+		return new BufferScanResult(scanStartIndex, _noEolFoundIndex, eolCharsCount: 0);
 	}
 
 	private static int GetLineIndent(ref Span<char> line) => line.IndexOfAnyExcept(Symbol.Space, Symbol.Tab);
@@ -165,7 +165,10 @@ internal ref struct YamlReader(StreamReader yamlReader, Span<char> buffer)
 		public readonly int EndIndex = endIndex;
 		public readonly byte EolCharsCount = eolCharsCount;
 
-		public bool EolFound => EndIndex != _noEolFoundIndex;
+		// This property covers 2 cases:
+		// - when end of line index was found (but last line can have no EOL characters);
+		// - when EOL characters were found.
+		public bool EolFound => EndIndex != _noEolFoundIndex || 0 < EolCharsCount;
 	}
 }
 
