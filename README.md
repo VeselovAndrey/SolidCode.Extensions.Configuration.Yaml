@@ -1,5 +1,9 @@
 # SolidCode.Extensions.Configuration.Yaml
 
+![NuGet build](https://github.com/VeselovAndrey/SolidCode.Extensions.Configuration.Yaml/actions/workflows/publish_release.yml/badge.svg)
+[![NuGet](https://img.shields.io/nuget/v/SolidCode.Extensions.Configuration.Yaml.svg)](https://www.nuget.org/packages/SolidCode.Extensions.Configuration.Yaml/)  
+![Development build](https://github.com/VeselovAndrey/SolidCode.Extensions.Configuration.Yaml/actions/workflows/publish_development.yml/badge.svg)
+
 `SolidCode.Extensions.Configuration.Yaml` is a library that provides YAML configuration support for `Microsoft.Extensions.Configuration`. 
 
 YAML is often used for configuration files due to its human-readable format. But often not all its features are required for describing configuration settings.
