@@ -29,6 +29,22 @@ jobs:
       working-directory: ./src
       run: dotnet test -c Release
 
+    - name: Install CycloneDX tool
+      run: export PATH="$PATH:/home/actions-runner/.dotnet/tools" && dotnet tool install --global CycloneDX
+
+    - name: Generate SBOM file
+      working-directory: ./src
+      run: export PATH="$PATH:/home/actions-runner/.dotnet/tools" && dotnet CycloneDX ./SolidCode.Extensions.Configuration.Yaml.sln
+
+    - name: Upload SBOM file to Dependency Track server
+      working-directory: ./src
+      run: |
+        curl -X POST "${{ secrets.DEPENDENCY_TRACK_URL }}/api/v1/bom" \
+        -H "Content-Type: multipart/form-data" \
+        -H "X-Api-Key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}" \
+        -F "project=${{ secrets.DEPENDENCY_TRACK_PROJECT_GUID_DEVELOPMENT }}" \
+        -F "bom=@bom.xml"
+
     - name: Pack
       working-directory: ./src/SolidCode.Extensions.Configuration.Yaml
       run: dotnet pack --configuration Release
