@@ -38,15 +38,11 @@ jobs:
 
     - name: Upload SBOM file to Dependency Track server
       working-directory: ./src
-      env:
-        DEPENDENCY_TRACK_API_KEY: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
-        DEPENDENCY_TRACK_URL: ${{ secrets.DEPENDENCY_TRACK_URL }}
-        DEPENDENCY_TRACK_PROJECT_GUID: ${{ secrets.DEPENDENCY_TRACK_PROJECT_GUID_DEVELOPMENT }}
       run: |
-        curl -X POST "$DEPENDENCY_TRACK_URL/api/v1/bom" \
+        curl -X POST "${{ secrets.DEPENDENCY_TRACK_URL }}/api/v1/bom" \
         -H "Content-Type: multipart/form-data" \
-        -H "X-Api-Key: $DEPENDENCY_TRACK_API_KEY" \
-        -F "project=$(DEPENDENCY_TRACK_PROJECT_GUID)" \
+        -H "X-Api-Key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}" \
+        -F "project=${{ secrets.DEPENDENCY_TRACK_PROJECT_GUID_DEVELOPMENT }}" \
         -F "bom=@bom.xml"
 
     - name: Pack
