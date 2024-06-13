@@ -29,6 +29,9 @@ jobs:
       working-directory: ./src
       run: dotnet test -c Release
 
+    - name: Setup tools path
+      run: export PATH="$PATH:~/.dotnet/tools"
+
     - name: Install CycloneDX tool
       run: dotnet tool install --global CycloneDX
 
