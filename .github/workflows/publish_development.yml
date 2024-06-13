@@ -29,15 +29,12 @@ jobs:
       working-directory: ./src
       run: dotnet test -c Release
 
-    - name: Setup tools path
-      run: export GITHUB_PATH="GITHUB_PATH:/home/actions-runner/.dotnet/tools"
-
     - name: Install CycloneDX tool
-      run: dotnet tool install --global CycloneDX
+      run: export PATH="$PATH:/home/actions-runner/.dotnet/tools" && dotnet tool install --global CycloneDX
 
     - name: Generate SBOM file
       working-directory: ./src
-      run: dotnet CycloneDX ./SolidCode.Extensions.Configuration.Yaml.sln
+      run: export PATH="$PATH:/home/actions-runner/.dotnet/tools" && dotnet CycloneDX ./SolidCode.Extensions.Configuration.Yaml.sln
 
     - name: Upload SBOM file to Dependency Track server
       working-directory: ./src
