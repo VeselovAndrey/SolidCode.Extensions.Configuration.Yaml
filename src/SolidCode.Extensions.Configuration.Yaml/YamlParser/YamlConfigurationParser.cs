@@ -16,13 +16,13 @@ internal static class YamlConfigurationParser
 		var nodesStack = new Stack<ActiveYamlNode>(capacity: 10);
 		int activeIndent = 0;
 
-		using var yamlReader = new StreamReader(yamlStream);
+		using var yamlStreamReader = new StreamReader(yamlStream);
 
 		int bufferSize = GetBufferSize(yamlStream, options);
-		var buffer = new YamlReader(yamlReader, stackalloc char[bufferSize]);
+		var yamlReader = new YamlReader(yamlStreamReader, buffer: stackalloc char[bufferSize]);
 
-		while (!buffer.EndOfYaml) {
-			if (!TryReadNextNode(ref buffer, options, out YamlNode node))
+		while (!yamlReader.EndOfYaml) {
+			if (!TryReadNextNode(ref yamlReader, options, out YamlNode node))
 				break;
 
 			// If current line indent is less than the active (previous line) indent,
@@ -39,11 +39,11 @@ internal static class YamlConfigurationParser
 					break;
 
 				case YamlNodeType.Sequence:
-					ProcessSequenceNode(node, nodesStack, configuration, buffer.ScanLineNumber);
+					ProcessSequenceNode(node, nodesStack, configuration, yamlReader.ScanLineNumber);
 					break;
 
 				default:
-					throw new YamlConfigurationParsingException($"Unexpected node type `{node.NodeType}` at line {buffer.ScanLineNumber}.");
+					throw new YamlConfigurationParsingException($"Unexpected node type `{node.NodeType}` at line {yamlReader.ScanLineNumber}.");
 			}
 
 			activeIndent = node.Indent;
@@ -80,7 +80,7 @@ internal static class YamlConfigurationParser
 			parentNodes.Push(newNode);
 		}
 		else {
-			// If parent node has no value but has same indent, it's a mapping without value. So need to close it.
+			// If the parent node has no value but has the same indent, it's a mapping without a value and needs to be closed.
 			if (parentNodes.TryPeek(out ActiveYamlNode? mappingParentNode) && mappingParentNode.Indent == currentNode.Indent)
 				parentNodes.TryPop(out ActiveYamlNode? _);
 
@@ -121,22 +121,22 @@ internal static class YamlConfigurationParser
 		}
 	}
 
-	private static bool TryReadNextNode(ref YamlReader buffer, YamlConfigurationOptions options, out YamlNode node)
+	private static bool TryReadNextNode(ref YamlReader reader, YamlConfigurationOptions options, out YamlNode node)
 	{
-		ReadOnlySpan<char> line = buffer.ReadLine();
+		ReadOnlySpan<char> line = reader.ReadLine();
 		ParsedLine parsedLine = ParseLine(ref line);
 
 		while (parsedLine.LineType is YamlLineType.Empty or YamlLineType.Comment) {
-			if (buffer.EndOfYaml) {
-				node = new YamlNode(YamlNodeType.Unspecified, indent: default, key: string.Empty, value: string.Empty);
+			if (reader.EndOfYaml) {
+				node = default;
 				return false;
 			}
 
-			line = buffer.ReadLine();
+			line = reader.ReadLine();
 			parsedLine = ParseLine(ref line);
 		}
 
-		// Save key to string because buffer can be changed in case of long single line or multiline value.
+		// Save the key to a string because the buffer can change in the case of a long single line or multiline value.
 		string key = parsedLine.Key.Trim().ToString();
 
 		string valueString;
@@ -145,13 +145,13 @@ internal static class YamlConfigurationParser
 
 		if (0 < value.Length) {
 			// Check if the value is a quoted string.
-			if (value[0] is YamlSymbol.DoubleQuote or YamlSymbol.SingleQuote) {
+			if (value[0] is YamlIndicatorCharacter.DoubleQuote or YamlIndicatorCharacter.SingleQuote) {
 				valueString = RemoveQuotes(value);
 			}
 			else {
-				// Read multi-line value or single line value
-				if (value[0] is YamlSymbol.FoldedScalar or YamlSymbol.LiteralScalar)
-					valueString = BuildMultilineValue(ref buffer, parsedLine.Indent, value[0], options);
+				// Read multi-line value or single line value.
+				if (value[0] is YamlIndicatorCharacter.FoldedBlockScalar or YamlIndicatorCharacter.LiteralBlockScalar)
+					valueString = BuildMultilineValue(ref reader, parsedLine.Indent, value[0], options);
 				else
 					valueString = value.Trim().ToString();
 			}
@@ -180,22 +180,22 @@ internal static class YamlConfigurationParser
 
 		ReadOnlySpan<char> lineContent = line[indent..];
 
-		if (lineContent[0] == YamlSymbol.Comment)
+		if (lineContent[0] == YamlIndicatorCharacter.Comment)
 			return new ParsedLine(YamlLineType.Comment, indent, ReadOnlySpan<char>.Empty, ReadOnlySpan<char>.Empty);
 
 		GetKeyAndValue(lineContent, out ReadOnlySpan<char> key, out ReadOnlySpan<char> value);
 
 		return key.IsEmpty
-			? value[0] == YamlSymbol.Sequence
+			? value[0] == YamlIndicatorCharacter.BlockSequence
 				? new ParsedLine(YamlLineType.Sequence, indent, ReadOnlySpan<char>.Empty, value[1..])
 				: new ParsedLine(YamlLineType.Scalar, indent, ReadOnlySpan<char>.Empty, value)
-			: key[0] == YamlSymbol.Sequence
+			: key[0] == YamlIndicatorCharacter.BlockSequence
 				? new ParsedLine(YamlLineType.Sequence, indent, key[1..], value)
 				: new ParsedLine(YamlLineType.Mapping, indent, key.Trim(), value);
 
 		static void GetKeyAndValue(ReadOnlySpan<char> line, out ReadOnlySpan<char> key, out ReadOnlySpan<char> value)
 		{
-			int separatorIndex = line.IndexOf(YamlSymbol.KeySeparator);
+			int separatorIndex = line.IndexOf(YamlIndicatorCharacter.MappingKeySeparator);
 			if (separatorIndex == _noSymbolFoundIndex) {
 				key = ReadOnlySpan<char>.Empty;
 				value = line;
@@ -210,7 +210,7 @@ internal static class YamlConfigurationParser
 			}
 
 			// Check for the case when the separator is inside the quoted string.
-			int quoteIndex = line.IndexOfAny([YamlSymbol.SingleQuote, YamlSymbol.DoubleQuote]);
+			int quoteIndex = line.IndexOfAny([YamlIndicatorCharacter.SingleQuote, YamlIndicatorCharacter.DoubleQuote]);
 			if (quoteIndex != _noSymbolFoundIndex && quoteIndex < separatorIndex) {
 				key = ReadOnlySpan<char>.Empty;
 				value = line;
@@ -218,7 +218,10 @@ internal static class YamlConfigurationParser
 			}
 
 			key = line[..separatorIndex];
-			value = line[(separatorIndex + 1)..];
+			int valueStartIndex = separatorIndex + 2; // +2 to skip the space and move to the next character.
+			value = valueStartIndex < line.Length
+				? line[valueStartIndex..]
+				: ReadOnlySpan<char>.Empty;
 		}
 	}
 
@@ -245,7 +248,7 @@ internal static class YamlConfigurationParser
 
 			for (int i = 1; i < value.Length; i++) {
 				if (value[i] == quotationMark) {
-					if (value[i - 1] != YamlSymbol.Escape)
+					if (value[i - 1] != YamlIndicatorCharacter.Escape)
 						return (i, escapedQuotesCount);
 
 					escapedQuotesCount++;
@@ -261,7 +264,7 @@ internal static class YamlConfigurationParser
 			int unescapedIndex = 0;
 
 			for (int i = 0; i < value.Length; i++) {
-				if (value[i] == YamlSymbol.Escape && i < value.Length && value[i + 1] == quoteChar) {
+				if (value[i] == YamlIndicatorCharacter.Escape && i < value.Length && value[i + 1] == quoteChar) {
 					unescapedValue[unescapedIndex] = quoteChar;
 					i++;
 				}
@@ -280,7 +283,7 @@ internal static class YamlConfigurationParser
 	{
 		int commentIndex = -1;
 		do {
-			commentIndex = value.IndexOf(YamlSymbol.Comment, commentIndex + 1);
+			commentIndex = value.IndexOf(YamlIndicatorCharacter.Comment, commentIndex + 1);
 			if (0 == commentIndex || (0 < commentIndex && value[commentIndex - 1] == Symbol.Space)) {
 				value = value[..commentIndex];
 				break;
@@ -290,12 +293,12 @@ internal static class YamlConfigurationParser
 		return value;
 	}
 
-	private static string BuildMultilineValue(ref YamlReader buffer, int baseIndent, char scalarSymbol, YamlConfigurationOptions options)
+	private static string BuildMultilineValue(ref YamlReader reader, int baseIndent, char scalarSymbol, YamlConfigurationOptions options)
 	{
-		MultilineReadResult readResult = buffer.ReadMultiline(baseIndent);
+		MultilineReadResult readResult = reader.ReadMultiline(baseIndent);
 		int scalarBlockIndent = GetLineIndent(ref readResult.Lines);
 
-		// Assuming that incoming text uses 1 char as EOL (LF). So in the case of CRLF need to add 1 character per line.
+		// Assuming that the incoming text uses 1 character as EOL (LF). In the case of CRLF, 1 character per line needs to be added.
 		int bufferLength = options.EndOfLineType == EndOfLineType.Windows
 			? readResult.Lines.Length + readResult.LinesCount
 			: readResult.Lines.Length;
@@ -311,7 +314,7 @@ internal static class YamlConfigurationParser
 			ReadOnlySpan<char> currentBlock = readResult.Lines[readerIndex..readResult.Lines.Length];
 			int eolIndex = currentBlock.IndexOfAny(Symbol.CR, Symbol.LF);
 
-			// If the EOL index was not found then assume that the current line ends at the scalar block ending.
+			// If the EOL index was not found, then assume that the current line ends at the scalar block ending.
 			if (eolIndex == -1)
 				eolIndex = readResult.Lines.Length - readerIndex;
 
@@ -326,8 +329,8 @@ internal static class YamlConfigurationParser
 
 			Span<char> currentValue = value[writerIndex..];
 
-			// Add separator for folded scalar
-			if (scalarSymbol == YamlSymbol.FoldedScalar && 0 < writerIndex) {
+			// Add separator for folded scalar.
+			if (scalarSymbol == YamlIndicatorCharacter.FoldedBlockScalar && 0 < writerIndex) {
 				if (scalarBlockIndent < currentLineIndent) {
 					if (value[writerIndex - 1] is not Symbol.CR and not Symbol.LF) {
 						eol.CopyTo(currentValue);
@@ -344,18 +347,18 @@ internal static class YamlConfigurationParser
 				}
 			}
 
-			// Copy line
+			// Copy line.
 			currentLine.CopyTo(currentValue);
 			writerIndex += currentLine.Length;
 
-			// Add EOL
+			// Add EOL.
 			if (writerIndex < value.Length - 1) {
-				if (scalarSymbol == YamlSymbol.LiteralScalar) {
+				if (scalarSymbol == YamlIndicatorCharacter.LiteralBlockScalar) {
 					currentValue = value[writerIndex..];
 					eol.CopyTo(currentValue);
 					writerIndex += eol.Length;
 				}
-				else // scalarSymbol == YamlSymbol.FoldedScalar
+				else // scalarSymbol == YamlIndicatorCharacter.FoldedScalar
 				{
 					currentValue = value[writerIndex..];
 					if (scalarBlockIndent < currentLineIndent) {
@@ -365,7 +368,7 @@ internal static class YamlConfigurationParser
 				}
 			}
 
-			readerIndex += eolIndex + 1; // +1 to skip CR or LF character
+			readerIndex += eolIndex + 1; // +1 to skip CR or LF character.
 			if (readerIndex < (readResult.Lines.Length - 2) && readResult.Lines[readerIndex - 1] == Symbol.CR && readResult.Lines[readerIndex] == Symbol.LF)
 				readerIndex++;
 		}
@@ -388,11 +391,11 @@ internal static class YamlConfigurationParser
 		if (trimmed.Length < source.Length) {
 			int index = trimmed.Length; // The length is equal to the index of the next symbol in source.
 
-			// Check for POSIX (Linux, Mac) EOL
+			// Check for POSIX (Linux, Mac) EOL.
 			if (source[index] is Symbol.LF)
 				return source[..(index + 1)];
 
-			// Check for Windows / DOS EOL
+			// Check for Windows / DOS EOL.
 			index++;
 			if ((index < source.Length - 1) && source[index - 1] == Symbol.CR && source[index] == Symbol.LF)
 				return source[..(index + 1)];
@@ -404,17 +407,24 @@ internal static class YamlConfigurationParser
 	private static int GetLineIndent(ref ReadOnlySpan<char> line) => line.IndexOfAnyExcept(Symbol.Space, Symbol.Tab);
 }
 
-internal static class YamlSymbol
+internal static class YamlIndicatorCharacter
 {
-	public const char KeySeparator = ':';
 	public const char Comment = '#';
+
 	public const char Escape = '\\';
-	public const char Sequence = '-';
-	public const char LiteralScalar = '|';
-	public const char FoldedScalar = '>';
+
+	public const char MappingKeySeparator = ':';
+	public const char BlockSequence = '-';
+
+	public const char FlowSequenceStart = '[';
+	public const char FlowSequenceEnd = ']';
+
+	public const char LiteralBlockScalar = '|';
+	public const char FoldedBlockScalar = '>';
 
 	public const char DoubleQuote = '"';
 	public const char SingleQuote = '\'';
+
 }
 
 internal static class Symbol
