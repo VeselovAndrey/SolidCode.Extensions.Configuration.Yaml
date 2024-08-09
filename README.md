@@ -89,21 +89,21 @@ This class has following properties:
 
 Here is example of benchmark results for parsing YAML files (see `SolidCode.Extensions.Configuration.Yaml.Benchmark` project source code for YAML files):
 ```
-BenchmarkDotNet v0.13.12, Windows 11 (10.0.22631.3593/23H2/2023Update/SunValley3)
+BenchmarkDotNet v0.14.0, Windows 11 (10.0.22631.3958/23H2/2023Update/SunValley3)
 11th Gen Intel Core i9-11900H 2.50GHz, 1 CPU, 16 logical and 8 physical cores
 
-| Method                                              | Mean      | Error     | StdDev   | Ratio | Gen0    | Gen1   | Allocated | Alloc Ratio |
-|---------------------------------------------------- |----------:|----------:|---------:|------:|--------:|-------:|----------:|------------:|
-| 'YamlConfigurationParser. File: example_large.yaml' |  35.14 us | 0.695 us  | 0.854 us |  0.07 |  5.7983 | 0.8545 |  71.32 KB |        0.19 |
-| 'YamlDotNet-based parser. File: example_large.yaml' | 479.12 us | 9.365 us  | 8.760 us |  1.00 | 30.7617 | 9.7656 | 378.55 KB |        1.00 |
+| Method                                              | Mean      | Error     | StdDev    | Ratio | Gen0    | Gen1    | Allocated | Alloc Ratio |
+|---------------------------------------------------- |----------:|----------:|----------:|------:|--------:|--------:|----------:|------------:|
+| 'YamlConfigurationParser. File: example_large.yaml' |  33.88 us | 0.250 us  | 0.208 us  |  0.07 |  5.7983 |  0.8545 |  71.32 KB |        0.16 |
+| 'YamlDotNet-based parser. File: example_large.yaml' | 456.30 us | 5.036 us  | 4.711 us  |  1.00 | 35.6445 | 12.6953 | 442.05 KB |        1.00 |
 
-| Method                                              | Mean      | Error     | StdDev    | Ratio | Gen0   | Gen1   | Allocated | Alloc Ratio |
-|---------------------------------------------------- |----------:|----------:|----------:|------:|-------:|-------:|----------:|------------:|
-| 'YamlConfigurationParser. File: example_small.yaml' |  7.885 us | 0.1552 us | 0.2225 us |  0.10 | 1.0834 | 0.0305 |   13.3 KB |        0.21 |
-| 'YamlDotNet-based parser. File: example_small.yaml' | 77.751 us | 1.5481 us | 1.7207 us |  1.00 | 5.0049 | 0.3662 |  62.14 KB |        1.00 |
+| Method                                              | Mean      | Error     | StdDev    | Ratio | Gen0    | Gen1    | Allocated | Alloc Ratio |
+|---------------------------------------------------- |----------:|----------:|----------:|------:|--------:|--------:|----------:|------------:|
+| 'YamlConfigurationParser. File: example_small.yaml' |  7.607 us | 0.0558 us | 0.0494 us |  0.10 | 1.0834  | 0.0305  |   13.3 KB |        0.19 |
+| 'YamlDotNet-based parser. File: example_small.yaml' | 73.380 us | 0.6213 us | 0.5508 us |  1.00 | 5.7373  | 0.6104  |  70.79 KB |        1.00 |
 ```
 
-YamlDotNet library version: 15.1.4
+YamlDotNet library version: 16.0.0
 
 ## License
 
