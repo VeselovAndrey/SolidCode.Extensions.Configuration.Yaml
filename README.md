@@ -103,7 +103,7 @@ BenchmarkDotNet v0.14.0, Windows 11 (10.0.22631.3958/23H2/2023Update/SunValley3)
 | 'YamlDotNet-based parser. File: example_small.yaml' | 73.380 us | 0.6213 us | 0.5508 us |  1.00 | 5.7373  | 0.6104  |  70.79 KB |        1.00 |
 ```
 
-YamlDotNet library version: 16.0.0
+YamlDotNet library version: 16.1.0
 
 ## License
 
