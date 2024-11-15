@@ -6,7 +6,7 @@ using YamlDotNet.RepresentationModel;
 /// <summary>The configuration parser implementation using YamlDotNet.</summary>
 internal static class YamlDotNetParser
 {
-	private static readonly IDictionary<string, string?> _data = new SortedDictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+	private static readonly SortedDictionary<string, string?> _data = new SortedDictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
 	private static readonly Stack<string> _paths = new Stack<string>();
 	private static string _currentPath = string.Empty;
 
