@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="SolidCode.Extensions.Configuration.Yaml.Benchmark/SolidCode.Extensions.Configuration.Yaml.Benchmark.csproj" />
+  <Project Path="SolidCode.Extensions.Configuration.Yaml.Tests/SolidCode.Extensions.Configuration.Yaml.Tests.csproj" />
+  <Project Path="SolidCode.Extensions.Configuration.Yaml/SolidCode.Extensions.Configuration.Yaml.csproj" />
+</Solution>

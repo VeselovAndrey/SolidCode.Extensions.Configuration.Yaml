@@ -37,7 +37,7 @@ jobs:
 
     - name: Generate SBOM file
       working-directory: ./src
-      run: export PATH="$PATH:/home/actions-runner/.dotnet/tools" && dotnet CycloneDX ./SolidCode.Extensions.Configuration.Yaml.sln
+      run: export PATH="$PATH:/home/actions-runner/.dotnet/tools" && dotnet CycloneDX ./SolidCode.Extensions.Configuration.Yaml.slnx
 
     - name: Upload SBOM file to Dependency Track server
       working-directory: ./src
