@@ -89,18 +89,18 @@ This class has following properties:
 
 Here is example of benchmark results for parsing YAML files (see `SolidCode.Extensions.Configuration.Yaml.Benchmark` project source code for YAML files):
 ```
-BenchmarkDotNet v0.14.0, Windows 11 (10.0.22631.3958/23H2/2023Update/SunValley3)
+BenchmarkDotNet v0.15.8, Windows 11 
 11th Gen Intel Core i9-11900H 2.50GHz, 1 CPU, 16 logical and 8 physical cores
 
 | Method                                              | Mean      | Error     | StdDev    | Ratio | Gen0    | Gen1    | Allocated | Alloc Ratio |
 |---------------------------------------------------- |----------:|----------:|----------:|------:|--------:|--------:|----------:|------------:|
-| 'YamlConfigurationParser. File: example_large.yaml' |  33.88 us | 0.250 us  | 0.208 us  |  0.07 |  5.7983 |  0.8545 |  71.32 KB |        0.16 |
-| 'YamlDotNet-based parser. File: example_large.yaml' | 456.30 us | 5.036 us  | 4.711 us  |  1.00 | 35.6445 | 12.6953 | 442.05 KB |        1.00 |
+| 'YamlConfigurationParser. File: example_large.yaml' |  28.26 us | 0.389 us  | 0.363 us  |  0.07 |  5.7983 |  0.8545 |  71.32 KB |        0.17 |
+| 'YamlDotNet-based parser. File: example_large.yaml' | 376.93 us | 3.442 us  | 3.051 us  |  1.00 | 35.1563 | 12.2070 | 432.22 KB |        1.00 |
 
 | Method                                              | Mean      | Error     | StdDev    | Ratio | Gen0    | Gen1    | Allocated | Alloc Ratio |
 |---------------------------------------------------- |----------:|----------:|----------:|------:|--------:|--------:|----------:|------------:|
-| 'YamlConfigurationParser. File: example_small.yaml' |  7.607 us | 0.0558 us | 0.0494 us |  0.10 | 1.0834  | 0.0305  |   13.3 KB |        0.19 |
-| 'YamlDotNet-based parser. File: example_small.yaml' | 73.380 us | 0.6213 us | 0.5508 us |  1.00 | 5.7373  | 0.6104  |  70.79 KB |        1.00 |
+| 'YamlConfigurationParser. File: example_small.yaml' |  6.613 us | 0.0477 us | 0.0446 us |  0.12 | 1.0834  | 0.0381  |   13.3 KB |        0.20 |
+| 'YamlDotNet-based parser. File: example_small.yaml' | 57.098 us | 0.4313 us | 0.4035 us |  1.00 | 5.4932  | 0.6104  |  67.95 KB |        1.00 |
 ```
 
 YamlDotNet library version: 16.3.0
