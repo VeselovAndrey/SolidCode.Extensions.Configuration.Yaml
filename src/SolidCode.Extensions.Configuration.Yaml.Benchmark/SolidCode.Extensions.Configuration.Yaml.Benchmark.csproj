@@ -8,6 +8,9 @@
 
 		<IsPackable>false</IsPackable>
 
+		<EnableNETAnalyzers>True</EnableNETAnalyzers>
+		<AnalysisLevel>10.0-recommended</AnalysisLevel>
+
 		<Copyright>©️ 2024-2025 Andrey Veselov</Copyright>
 	</PropertyGroup>
 
