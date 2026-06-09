@@ -44,7 +44,7 @@ jobs:
 
     - name: Generate SBOM file
       working-directory: ./src
-      run: export PATH="$PATH:/home/actions-runner/.dotnet/tools" && dotnet CycloneDX ./SolidCode.Extensions.Configuration.Yaml.slnx
+      run: export PATH="$PATH:/home/actions-runner/.dotnet/tools" && dotnet CycloneDX ./SolidCode.Extensions.Configuration.Yaml.slnx -F json --spec-version 1.6
 
     - name: Upload SBOM file to Dependency Track server
       working-directory: ./src
@@ -53,7 +53,7 @@ jobs:
         -H "Content-Type: multipart/form-data" \
         -H "X-Api-Key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}" \
         -F "project=${{ secrets.DEPENDENCY_TRACK_PROJECT_GUID_DEVELOPMENT }}" \
-        -F "bom=@bom.xml"
+        -F "bom=@bom.json"
 
     - name: Pack
       working-directory: ./src/SolidCode.Extensions.Configuration.Yaml
